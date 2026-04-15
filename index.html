@@ -1,0 +1,1615 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODOXAT Tools</title>
+    <link rel="icon" href="https://xatimg.com/image/236O0HBG8NEC.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0A0A1A;
+            --glass-bg: rgba(10, 10, 30, 0.5);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(192, 132, 252, 0.8);
+            --primary-accent: #C084FC; /* purple-400 */
+        }
+
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes animated-gradient-text {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, #1e1b4b, #312e81, #0a0a1a, #4c1d95);
+            background-size: 400% 400%;
+            animation: gradient-animation 20s ease infinite;
+        }
+
+        .glass-card {
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .main-button {
+            background-image: linear-gradient(to right, #6d28d9, #a855f7, #d946ef);
+            background-size: 200% auto;
+            transition: background-position: 0.5s;
+        }
+        .main-button:hover {
+            background-position: right center;
+        }
+
+        .nav-item {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-item.active {
+            color: white;
+            background-color: rgba(192, 132, 252, 0.1);
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background-color: var(--primary-accent);
+            border-radius: 0 4px 4px 0;
+        }
+        .nav-item:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(192, 132, 252, 0.3); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(192, 132, 252, 0.5); }
+
+        .gradient-text {
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .animated-gradient {
+            background-size: 200% 200%;
+            animation: animated-gradient-text 3s ease-in-out infinite;
+        }
+
+        /* Auth Modal */
+        #auth-modal, #confirmation-modal {
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+        #auth-modal.hidden, #confirmation-modal.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Custom input[type=color] */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="text-gray-300 antialiased">
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+        <div id="auth-modal-content" class="glass-card rounded-2xl w-full max-w-sm p-8 relative">
+            <button id="close-auth-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x"></i>
+            </button>
+            <!-- Login Form -->
+            <div id="login-form-container">
+                <h2 class="text-2xl font-bold text-white text-center mb-6">Iniciar Sesión</h2>
+                <form id="login-form" class="space-y-4">
+                    <input type="text" id="login-username" placeholder="Nombre de usuario" class="w-full glass-card border-gray-700 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400" required>
+                    <input type="password" id="login-password" placeholder="Contraseña" class="w-full glass-card border-gray-700 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400" required>
+                    <button type="submit" class="main-button w-full font-bold py-3 px-4 rounded-lg text-white">Entrar</button>
+                    <p id="login-error" class="text-red-400 text-sm text-center h-4"></p>
+                </form>
+                <p class="text-center text-sm mt-4">
+                    ¿No tienes cuenta? <button id="show-register-form" class="font-semibold text-purple-400 hover:underline">Regístrate</button>
+                </p>
+            </div>
+            <!-- Register Form -->
+            <div id="register-form-container" class="hidden">
+                 <h2 class="text-2xl font-bold text-white text-center mb-6">Crear Cuenta</h2>
+                <form id="register-form" class="space-y-4">
+                    <input type="text" id="register-username" placeholder="Nombre de usuario" class="w-full glass-card border-gray-700 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400" required>
+                    <input type="password" id="register-password" placeholder="Contraseña (mín. 6 caracteres)" class="w-full glass-card border-gray-700 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400" required>
+                    <button type="submit" class="main-button w-full font-bold py-3 px-4 rounded-lg text-white">Registrar</button>
+                    <p id="register-error" class="text-red-400 text-sm text-center h-4"></p>
+                </form>
+                 <p class="text-center text-sm mt-4">
+                    ¿Ya tienes cuenta? <button id="show-login-form" class="font-semibold text-purple-400 hover:underline">Inicia Sesión</button>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-2xl w-full max-w-sm p-8 relative">
+            <h3 id="modal-title" class="text-xl font-bold text-white text-center mb-4">Confirmar Acción</h3>
+            <p id="modal-message" class="text-center text-gray-300 mb-6">¿Estás seguro?</p>
+            <div class="flex justify-center gap-4">
+                <button id="modal-cancel-button" class="w-full font-bold py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-700 text-white">Cancelar</button>
+                <button id="modal-confirm-button" class="w-full font-bold py-2 px-4 rounded-lg bg-red-600 hover:bg-red-700 text-white">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="relative min-h-screen md:flex">
+        <!-- Overlay for mobile menu -->
+        <div id="overlay" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden"></div>
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 fixed inset-y-0 left-0 glass-card border-r border-gray-800/50 flex flex-col transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-30">
+            <div class="p-6 text-center border-b border-gray-800/50 flex-shrink-0">
+                <img src="https://xatimg.com/image/236O0HBG8NEC.png" alt="TODOXAT Logo" class="h-12 mx-auto">
+            </div>
+            
+            <!-- Auth Section -->
+            <div class="p-4 border-b border-gray-800/50">
+                <div id="user-info" class="p-2 mb-2 text-center text-sm text-gray-300 font-semibold hidden rounded-lg bg-white/5"></div>
+                <div id="logged-out-buttons" class="grid grid-cols-2 gap-2">
+                    <button id="login-button" class="main-button w-full flex items-center justify-center gap-2 py-2 rounded-lg text-white font-semibold text-sm">
+                        <i data-lucide="log-in" class="h-4 w-4"></i><span>Entrar</span>
+                    </button>
+                    <button id="register-button" class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-white font-semibold bg-white/10 hover:bg-white/20 transition-colors text-sm">
+                        <i data-lucide="user-plus" class="h-4 w-4"></i><span>Registrarse</span>
+                    </button>
+                </div>
+                <button id="logout-button" class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-white font-semibold bg-red-600 hover:bg-red-700 transition-colors hidden">
+                    <i data-lucide="log-out" class="h-4 w-4"></i><span>Cerrar Sesión</span>
+                </button>
+            </div>
+
+            <nav id="sidebar-nav" class="flex-1 flex flex-col p-4 space-y-2 overflow-y-auto custom-scrollbar">
+                <button data-tab="home" class="nav-item active flex items-center gap-3 px-4 py-2 rounded-lg">
+                    <i data-lucide="home"></i><span>Inicio</span>
+                </button>
+                <button data-tab="community" id="community-nav-item" class="nav-item flex items-center gap-3 px-4 py-2 rounded-lg hidden">
+                    <i data-lucide="users"></i><span>Comunidad</span>
+                </button>
+                <button data-tab="my-colors" id="my-colors-nav-item" class="nav-item flex items-center gap-3 px-4 py-2 rounded-lg hidden">
+                    <i data-lucide="star"></i><span>Mis Colores</span>
+                </button>
+                <button data-tab="namegrad" class="nav-item flex items-center gap-3 px-4 py-2 rounded-lg">
+                    <i data-lucide="gem"></i><span>Namegrad</span>
+                </button>
+                <button data-tab="namecolor" class="nav-item flex items-center gap-3 px-4 py-2 rounded-lg">
+                    <i data-lucide="palette"></i><span>Namecolor</span>
+                </button>
+                <button data-tab="nameflag" class="nav-item flex items-center gap-3 px-4 py-2 rounded-lg">
+                    <i data-lucide="flag"></i><span>Nameflag</span>
+                </button>
+                <button data-tab="admin" id="admin-nav-item" class="nav-item flex items-center gap-3 px-4 py-2 rounded-lg hidden">
+                    <i data-lucide="shield"></i><span>Admin Panel</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-gray-800/50 text-xs leading-relaxed text-gray-500 flex-shrink-0 mt-auto">
+                <p class="mb-2 font-semibold text-gray-400">CREADOR: XATID 15051993</p>
+                <p>Sitio no afiliado a xat.com. Las marcas comerciales son propiedad de sus respectivos dueños.</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header Bar -->
+            <header id="api-info-bar" class="p-4 border-b border-gray-800/50 glass-card flex-shrink-0">
+                 <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="md:hidden flex items-center justify-between">
+                         <button id="menu-toggle" class="text-white p-2 rounded-md hover:bg-white/10">
+                            <i data-lucide="menu" class="h-6 w-6"></i>
+                        </button>
+                        <span class="text-lg font-bold text-white">TODOXAT Tools</span>
+                        <div class="w-10"></div> <!-- Spacer -->
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        <i data-lucide="star" class="w-5 h-5 mr-3 text-yellow-400 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="font-semibold text-xs text-gray-400 uppercase tracking-wider">Último Power</h4>
+                            <p id="latest-power-text" class="text-sm font-bold truncate text-white">Cargando...</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center">
+                         <i data-lucide="timer" class="w-5 h-5 mr-3 text-cyan-400 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="font-semibold text-xs text-gray-400 uppercase tracking-wider">Próximo Power</h4>
+                            <p id="countdown-text" class="text-sm font-bold text-white">Cargando...</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center min-h-[40px]">
+                         <i data-lucide="megaphone" class="w-5 h-5 mr-3 text-emerald-400 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="font-semibold text-xs text-gray-400 uppercase tracking-wider">Promocionados</h4>
+                            <div id="promoted-links" class="text-sm font-bold flex flex-wrap gap-x-3 justify-center transition-opacity duration-300 text-white">Cargando...</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+                 <div id="home-content" class="tab-content active">
+                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                         <button data-target-tab="namegrad" class="tool-card text-left p-6 rounded-2xl glass-card">
+                             <i data-lucide="gem" class="w-10 h-10 mb-4 text-cyan-400"></i>
+                             <h3 class="text-xl font-bold mb-2 text-white">Namegrad</h3>
+                             <p class="text-gray-400">Crea gradientes de color con animaciones.</p>
+                         </button>
+                         <button data-target-tab="namecolor" class="tool-card text-left p-6 rounded-2xl glass-card">
+                             <i data-lucide="palette" class="w-10 h-10 mb-4 text-rose-400"></i>
+                             <h3 class="text-xl font-bold mb-2 text-white">Namecolor</h3>
+                             <p class="text-gray-400">Elige un color y un brillo para tu nombre.</p>
+                         </button>
+                         <button data-target-tab="nameflag" class="tool-card text-left p-6 rounded-2xl glass-card">
+                             <i data-lucide="flag" class="w-10 h-10 mb-4 text-amber-400"></i>
+                             <h3 class="text-xl font-bold mb-2 text-white">Nameflag</h3>
+                             <p class="text-gray-400">Agrega la bandera de tu país a tu nombre.</p>
+                         </button>
+                         <button data-target-tab="community" id="community-tool-card" class="tool-card text-left p-6 rounded-2xl glass-card hidden">
+                            <i data-lucide="users" class="w-10 h-10 mb-4 text-emerald-400"></i>
+                            <h3 class="text-xl font-bold mb-2 text-white">Comunidad</h3>
+                            <p class="text-gray-400">Descubre creaciones de otros usuarios.</p>
+                        </button>
+                     </div>
+                </div>
+
+                <!-- Contenido de Comunidad -->
+                <div id="community-content" class="tab-content">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Colores de la Comunidad</h2>
+                    <div id="shared-colors-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Colores compartidos se insertarán aquí -->
+                        <div id="no-shared-colors-message" class="col-span-full text-center text-gray-400 py-16">
+                            <i data-lucide="cloud-off" class="w-16 h-16 mx-auto mb-4"></i>
+                            <p>Aún no se ha compartido ninguna creación.</p>
+                            <p class="text-sm">¡Sé el primero en compartir desde la sección "Mis Colores"!</p>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Contenido de Mis Colores -->
+                 <div id="my-colors-content" class="tab-content">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Mis Creaciones</h2>
+                    
+                    <!-- Formulario para añadir color manualmente -->
+                    <div class="glass-card p-4 rounded-xl mb-6 max-w-4xl mx-auto w-full">
+                        <h3 class="text-lg font-bold text-white mb-3">Añadir Creación Manualmente</h3>
+                        <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-3 md:space-y-0">
+                            <!-- Nombre -->
+                            <div class="flex-grow">
+                                <label for="manual-color-name" class="font-semibold text-xs mb-1 block">Nombre (Opcional):</label>
+                                <input type="text" id="manual-color-name" placeholder="Ej: Neón Verde" class="w-full glass-card border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                            </div>
+                            <!-- Código -->
+                            <div class="flex-grow-[2]">
+                                <label for="manual-color-input" class="font-semibold text-xs mb-1 block">Código:</label>
+                                <input type="text" id="manual-color-input" placeholder="(glow#...)" class="w-full glass-card border-gray-700 rounded-lg p-2 text-sm font-mono text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                            </div>
+                            <!-- Vista Previa -->
+                            <div class="flex-shrink-0 self-center md:self-end">
+                                <label class="font-semibold text-xs mb-1 block text-center">Vista Previa:</label>
+                                <div id="manual-color-preview" class="h-10 w-24 rounded-lg bg-gray-900/50 border border-gray-700/50 transition-all mx-auto"></div>
+                            </div>
+                            <!-- Botón -->
+                            <div class="flex-shrink-0">
+                                 <button id="save-manual-color-button" class="w-full md:w-auto flex items-center justify-center bg-green-600 hover:bg-green-700 font-bold py-2 px-4 rounded-lg transition-colors text-sm"><i data-lucide="save" class="mr-2 h-4 w-4"></i>Guardar Creación</button>
+                            </div>
+                        </div>
+                        <p id="manual-color-error" class="text-red-400 text-xs h-4 mt-2"></p>
+                    </div>
+
+                    <div id="saved-colors-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Los colores guardados se insertarán aquí -->
+                        <div id="no-colors-message" class="col-span-full text-center text-gray-400 py-16">
+                            <i data-lucide="folder-open" class="w-16 h-16 mx-auto mb-4"></i>
+                            <p>Aún no has guardado ninguna creación.</p>
+                            <p class="text-sm">Usa el botón "Guardar" en los generadores para añadirlas aquí.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenido de Namegrad (REDESIGNED) -->
+                <div id="namegrad-content" class="tab-content">
+                    <!-- Main container for the new layout -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow min-h-0">
+                
+                        <!-- Left Column: Gradient & Animation -->
+                        <div class="lg:col-span-1 flex flex-col gap-6 min-h-0">
+                            <!-- Gradient Card -->
+                            <div class="glass-card p-6 rounded-2xl flex flex-col flex-grow min-h-0">
+                                <h4 class="font-semibold text-white mb-4 flex-shrink-0">Gradiente</h4>
+                                <div class="flex items-center space-x-2 mb-4 flex-shrink-0">
+                                    <select id="color-count-select" class="w-full glass-card border-gray-700 rounded-lg p-2"></select>
+                                    <div class="flex items-center space-x-2 whitespace-nowrap">
+                                        <input type="checkbox" id="keep-colors-checkbox" class="form-checkbox h-5 w-5 rounded bg-gray-700 border-gray-600 text-purple-400 focus:ring-purple-500">
+                                        <label for="keep-colors-checkbox" class="text-sm">Conservar</label>
+                                    </div>
+                                </div>
+                                <div id="color-inputs" class="space-y-3 overflow-y-auto custom-scrollbar flex-grow"></div>
+                            </div>
+                
+                            <!-- Animation Card -->
+                            <div class="glass-card p-6 rounded-2xl space-y-4 flex-shrink-0">
+                                <h4 class="font-semibold text-white">Animación y Efectos</h4>
+                                <div>
+                                    <label class="font-semibold text-sm mb-1 block">Rotación: <span id="angle-value" class="font-mono bg-gray-900/70 px-2 py-1 rounded-md text-xs">90°</span></label>
+                                    <input type="range" id="angle" min="0" max="360" value="90" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <label for="namewave-enabled" class="font-semibold text-sm">Activar Namewave:</label>
+                                    <input type="checkbox" id="namewave-enabled" class="form-checkbox h-5 w-5 rounded bg-gray-700 border-gray-600 text-purple-400 focus:ring-purple-500">
+                                </div>
+                                <select id="namewave-style" class="w-full glass-card border-gray-700 rounded-lg p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <option value="#o1">Onda normal (#o1)</option>
+                                    <option value="#o2">Onda rápida (#o2)</option>
+                                    <option value="#o3">Onda muy rápida (#o3)</option>
+                                    <option value="#f1">Flash lento (#f1)</option>
+                                    <option value="#f3">Flash normal (#f3)</option>
+                                    <option value="#f4">Flash rápido (#f4)</option>
+                                </select>
+                            </div>
+                        </div>
+                
+                        <!-- Right Column: Nick/Glow, Preview, Code -->
+                        <div class="lg:col-span-2 flex flex-col gap-6 min-h-0">
+                            <!-- Nick, Glow, Bold Card -->
+                            <div class="glass-card p-6 rounded-2xl flex-shrink-0">
+                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                    <div class="md:col-span-1">
+                                        <label for="nickname-input" class="font-semibold text-sm mb-1 block">Tu Nick:</label>
+                                        <input type="text" id="nickname-input" class="w-full glass-card border-gray-700 rounded-lg p-2 font-semibold text-white" value="TuNickAquí" placeholder="Escribe tu nick...">
+                                    </div>
+                                    <div>
+                                        <label class="font-semibold text-sm mb-1 block">Brillo (Glow):</label>
+                                        <div class="flex items-center space-x-2">
+                                            <input type="color" id="namegrad-glow-picker" value="#000001">
+                                            <input type="text" id="namegrad-glow-hex-input" value="#000001" class="w-full glass-card border-gray-700 rounded-md p-2 font-mono text-sm text-white">
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-start md:justify-center pb-2">
+                                        <label for="bold-checkbox" class="font-semibold text-sm mr-3">Negrita:</label>
+                                        <input type="checkbox" id="bold-checkbox" class="form-checkbox h-5 w-5 rounded bg-gray-700 border-gray-600 text-purple-400 focus:ring-purple-500">
+                                    </div>
+                                 </div>
+                            </div>
+                
+                            <!-- Preview -->
+                            <div class="glass-card p-4 sm:p-8 rounded-2xl flex-grow flex items-center justify-center overflow-hidden min-h-0">
+                                <div id="preview-container" class="relative text-6xl sm:text-7xl lg:text-8xl font-black text-center break-all whitespace-nowrap">
+                                    <div id="preview-glow" style="color: transparent;">TuNickAquí</div>
+                                    <div id="preview-text" class="gradient-text absolute top-0 left-0 w-full h-full">TuNickAquí</div>
+                                </div>
+                            </div>
+                
+                            <!-- Code Output -->
+                            <div class="glass-card p-6 rounded-xl flex-shrink-0">
+                                <h3 class="font-semibold mb-3 flex items-center"><i data-lucide="code" class="mr-2 h-5 w-5"></i>Código Generado</h3>
+                                <div class="relative">
+                                    <textarea id="output-code" readonly class="w-full glass-card border-gray-700 rounded-lg p-3 font-mono resize-none pr-24" rows="2"></textarea>
+                                    <div class="absolute top-1/2 -translate-y-1/2 right-3 flex space-x-2">
+                                        <button id="save-namegrad-button" title="Guardar Creación" class="p-2 rounded-md text-gray-400 hover:bg-white/10 hover:text-white transition-colors hidden"><i data-lucide="save"></i></button>
+                                        <button id="copy-button" title="Copiar Código" class="p-2 rounded-md text-gray-400 hover:bg-white/10 hover:text-white transition-colors"><i data-lucide="copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                 <!-- Contenido de Namecolor -->
+                <div id="namecolor-content" class="tab-content">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Generador Namecolor</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-1 glass-card p-6 rounded-xl">
+                             <div class="space-y-6">
+                                <div>
+                                    <h4 class="font-semibold mb-3 flex items-center"><i data-lucide="sparkles" class="mr-2 h-5 w-5"></i>Color del Brillo (Glow)</h4>
+                                    <div class="flex items-center space-x-4">
+                                        <input type="color" id="namecolor-glow-picker" value="#FF0000">
+                                        <input type="text" id="namecolor-glow-hex-input" value="#FF0000" class="w-full glass-card border-gray-700 rounded-md p-2 font-mono text-sm text-white">
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold mb-3 flex items-center"><i data-lucide="paint-bucket" class="mr-2 h-5 w-5"></i>Color del Texto</h4>
+                                    <div class="flex items-center space-x-4">
+                                        <input type="color" id="namecolor-text-picker" value="#2F0000">
+                                        <input type="text" id="namecolor-text-hex-input" value="#2F0000" class="w-full glass-card border-gray-700 rounded-md p-2 font-mono text-sm text-white">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 flex flex-col space-y-6">
+                            <div class="glass-card p-6 rounded-xl flex-grow flex items-center justify-center min-h-[200px]">
+                                <h2 id="namecolor-preview" class="text-5xl sm:text-6xl lg:text-7xl font-black break-all">ColorSólido</h2>
+                            </div>
+                            <div class="glass-card p-6 rounded-xl">
+                                <h3 class="font-semibold mb-3 flex items-center"><i data-lucide="code" class="mr-2 h-5 w-5"></i>Código Generado</h3>
+                                <div class="relative">
+                                    <textarea id="namecolor-output" readonly class="w-full glass-card border-gray-700 rounded-lg p-3 font-mono resize-none pr-12" rows="2"></textarea>
+                                    <div class="absolute top-3 right-3 flex space-x-2">
+                                        <button id="save-namecolor-button" title="Guardar Creación" class="text-gray-400 hover:text-white transition-colors hidden"><i data-lucide="save"></i></button>
+                                        <button id="namecolor-copy-button" title="Copiar Código" class="text-gray-400 hover:text-white transition-colors"><i data-lucide="copy"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Contenido de Nameflag -->
+                <div id="nameflag-content" class="tab-content">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Generador Nameflag</h2>
+                    <div class="max-w-3xl mx-auto glass-card p-6 rounded-xl">
+                         <div class="flex flex-col gap-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                               <div>
+                                    <h4 class="font-semibold mb-3 flex items-center"><i data-lucide="sparkles" class="mr-2 h-5 w-5"></i>Color del Brillo</h4>
+                                    <div class="flex items-center space-x-4">
+                                        <input type="color" id="nameflag-glow-picker" value="#000001">
+                                        <input type="text" id="nameflag-glow-hex-input" value="#000001" class="w-full glass-card border-gray-700 rounded-md p-2 font-mono text-sm text-white">
+                                    </div>
+                                </div>
+                                 <div>
+                                    <h4 class="font-semibold mb-3 flex items-center"><i data-lucide="film" class="mr-2 h-5 w-5"></i>Efecto de Animación</h4>
+                                    <select id="nameflag-options-select" class="w-full glass-card border-gray-700 rounded-lg p-2.5">
+                                        <option value="">Sin efecto</option>
+                                    </select>
+                                </div>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold mb-3 flex items-center"><i data-lucide="globe" class="mr-2 h-5 w-5"></i>Bandera</h4>
+                                <select id="nameflag-select" class="w-full glass-card border-gray-700 rounded-lg p-3 text-lg">
+                                    <option value="">-- Selecciona una bandera --</option>
+                                </select>
+                            </div>
+                            <div class="border-t border-gray-700/50 pt-6">
+                                <h4 class="font-semibold mb-3 flex items-center"><i data-lucide="code" class="mr-2 h-5 w-5"></i>Código Generado</h4>
+                                <div class="relative">
+                                    <textarea id="nameflag-output" readonly class="w-full glass-card border-gray-700 rounded-lg p-3 font-mono resize-none pr-12" rows="2"></textarea>
+                                    <button id="nameflag-copy-button" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors"><i data-lucide="copy"></i></button>
+                                </div>
+                            </div>
+                             <div class="text-center pt-4 border-t border-gray-700/50">
+                                <p class="text-sm font-semibold text-gray-400">CRÉDITOS: DJ FUNNY</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Panel -->
+                <div id="admin-content" class="tab-content">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Panel de Administración</h2>
+                    <div class="glass-card p-6 rounded-xl">
+                        <h3 class="text-lg font-bold text-white mb-4">Usuarios Registrados</h3>
+                        <div id="user-list-container" class="space-y-3">
+                            <p id="admin-loading-message">Cargando usuarios...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, doc, deleteDoc, serverTimestamp, setDoc, getDocs, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- CONFIGURACIÓN DE FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgGtAuKM-kvmAmsRba4wxYtlz-fteYeew",
+            authDomain: "xdsas-7ef58.firebaseapp.com",
+            projectId: "xdsas-7ef58",
+            storageBucket: "xdsas-7ef58.firebasestorage.app",
+            messagingSenderId: "617416400693",
+            appId: "1:617416400693:web:d3219e8947037e8bf1b67c"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // --- Lógica de Menú Móvil ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const navLinks = document.querySelectorAll('#sidebar-nav button, #sidebar-nav a');
+
+            const openMenu = () => {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+            
+            const closeMenu = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    openMenu();
+                } else {
+                    closeMenu();
+                }
+            });
+
+            overlay.addEventListener('click', closeMenu);
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    // Solo cerrar si la pantalla es de móvil (cuando el menú es flotante)
+                    if (window.innerWidth < 768) {
+                        closeMenu();
+                    }
+                });
+            });
+
+
+            // --- Lógica de API ---
+             (async () => {
+                const latestPowerText = document.getElementById('latest-power-text'), countdownText = document.getElementById('countdown-text'), promotedLinks = document.getElementById('promoted-links');
+                let countdownInterval;
+                const fetchData = async (url) => { try { const r = await fetch(`https://api.xatblog.net/${url}?cb=${new Date().getTime()}`); return await r.json(); } catch (e) { console.error(e); return null; } };
+                latestPowerText.textContent = countdownText.textContent = promotedLinks.textContent = "Cargando...";
+                const latestData = await fetchData('latest');
+                latestPowerText.textContent = latestData?.powers?.length > 0 ? `${latestData.powers[0].name} (${latestData.powers[0].prices?.store || 'N/A'})` : "No disponible";
+                const countdownData = await fetchData('countdown');
+                if (countdownData?.seconds !== undefined) {
+                    let s = parseInt(countdownData.seconds, 10);
+                    if (s < 0) { countdownText.textContent = "¡Nuevo power ahora!"; }
+                    else { const update = () => { if(s<=0){countdownText.textContent="¡Nuevo power ahora!";clearInterval(countdownInterval);return;} let d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sec=s%60; let t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; if(d>0)t=`${d}d ${t}`; countdownText.textContent=t; s--; }; update(); countdownInterval=setInterval(update,1000); }
+                } else { countdownText.textContent = "No hay contador"; }
+                const promotedData = await fetchData('promoted');
+                if (promotedData?.chats?.length > 0) {
+                    let i = 0; const chats = promotedData.chats; const update = () => { promotedLinks.classList.add('opacity-0'); setTimeout(()=>{ const c1=chats[i%chats.length],c2=chats[(i+1)%chats.length];let h=`<a href="https://xat.com/${c1.name}" target="_blank" class="hover:text-purple-400">${c1.name}</a>`; if(chats.length>1)h+=`<span class="text-gray-500 mx-1">|</span><a href="https://xat.com/${c2.name}" target="_blank" class="hover:text-purple-400">${c2.name}</a>`; promotedLinks.innerHTML=h; promotedLinks.classList.remove('opacity-0'); i=(i+2)%chats.length;},300);}; update(); setInterval(update,5000);
+                } else { promotedLinks.textContent = "Ninguno"; }
+            })();
+            
+            // --- Lógica de Navegación ---
+            const navItems = document.querySelectorAll('#sidebar-nav button');
+            const homeToolCards = document.querySelectorAll('#home-content .tool-card');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            const switchToTab = (tabId) => {
+                navItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.tab === tabId);
+                });
+                tabContents.forEach(content => {
+                    content.classList.toggle('active', content.id === `${tabId}-content`);
+                });
+            };
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => switchToTab(item.dataset.tab));
+            });
+            
+            homeToolCards.forEach(card => {
+                card.addEventListener('click', () => switchToTab(card.dataset.targetTab));
+            });
+
+            // --- Lógica de Copiar al Portapapeles ---
+            const setupCopyButton = (button, output) => {
+                if (!button || !output) return;
+
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evita que se disparen otros eventos
+                    const valueToCopy = typeof output === 'string' ? output : output.value;
+                    if (!valueToCopy) return;
+                    navigator.clipboard.writeText(valueToCopy).then(() => {
+                        const icon = button.querySelector('i');
+                        if (!icon) return;
+                        const originalIcon = icon.getAttribute('data-lucide');
+                        button.disabled = true;
+                        icon.setAttribute('data-lucide', 'check');
+                        lucide.createIcons();
+                        button.classList.add('text-green-400');
+
+                        setTimeout(() => {
+                            icon.setAttribute('data-lucide', originalIcon);
+                            lucide.createIcons();
+                            button.classList.remove('text-green-400');
+                            button.disabled = false;
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Error al copiar:', err);
+                    });
+                });
+            };
+
+            setupCopyButton(document.getElementById('copy-button'), document.getElementById('output-code'));
+            setupCopyButton(document.getElementById('namecolor-copy-button'), document.getElementById('namecolor-output'));
+            setupCopyButton(document.getElementById('nameflag-copy-button'), document.getElementById('nameflag-output'));
+
+            // --- Lógica de Namegrad ---
+            const initialNamegradState = { 
+                glowColor: '#000001', 
+                colors: ['#003B00', '#00FF00', '#003B00'], 
+                angle: 90,
+                bold: false, 
+                wave: { enabled: false, style: '#o1' } 
+            };
+            let namegradState = JSON.parse(JSON.stringify(initialNamegradState));
+            
+            // Elementos del DOM
+            const nicknameInput = document.getElementById('nickname-input');
+            const namegradGlowPicker = document.getElementById('namegrad-glow-picker');
+            const namegradGlowHexInput = document.getElementById('namegrad-glow-hex-input');
+            const colorCountSelect = document.getElementById('color-count-select');
+            const keepColorsCheckbox = document.getElementById('keep-colors-checkbox');
+            const colorInputsContainer = document.getElementById('color-inputs');
+            const angleSlider = document.getElementById('angle');
+            const angleValue = document.getElementById('angle-value');
+            const boldCheckbox = document.getElementById('bold-checkbox');
+            const namewaveEnabled = document.getElementById('namewave-enabled');
+            const namewaveStyle = document.getElementById('namewave-style');
+            
+            const previewGlow = document.getElementById('preview-glow');
+            const previewText = document.getElementById('preview-text');
+            const outputCode = document.getElementById('output-code');
+            const saveNamegradButton = document.getElementById('save-namegrad-button');
+
+            // --- Funciones auxiliares ---
+            const getRandomHexColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            
+            const syncColorInputs = (picker, hexInput) => {
+                picker.addEventListener('input', () => { hexInput.value = picker.value.toUpperCase(); updateNamegradApp(); });
+                hexInput.addEventListener('input', (e) => {
+                    let value = e.target.value.trim();
+                    if (!value.startsWith('#')) value = '#' + value;
+                    if (/^#[0-9A-F]{6}$/i.test(value)) { picker.value = value; updateNamegradApp(); }
+                });
+            };
+
+            // --- Funciones principales del generador ---
+            const updateNamegradPreview = () => {
+                const nick = nicknameInput.value || 'TuNickAquí';
+
+                // Actualizar texto y negrita en ambas capas
+                previewGlow.textContent = nick;
+                previewText.textContent = nick;
+                const fontWeight = namegradState.bold ? '900' : '800';
+                previewGlow.style.fontWeight = fontWeight;
+                previewText.style.fontWeight = fontWeight;
+                
+                // Aplicar el brillo (glow) a la capa inferior
+                previewGlow.style.textShadow = `0 0 4px ${namegradState.glowColor}, 0 0 8px ${namegradState.glowColor}`;
+                
+                // Aplicar el gradiente a la capa superior (el texto visible)
+                const reversedAngle = 360 - namegradState.angle;
+                const gradient = `linear-gradient(${reversedAngle}deg, ${namegradState.colors.join(', ')})`;
+                previewText.style.backgroundImage = gradient;
+                
+                // Aplicar animación a la capa superior
+                if (namegradState.wave.enabled) {
+                    previewText.classList.add('animated-gradient');
+                    let duration = '3s';
+                    const style = namegradState.wave.style;
+                    if (style === '#o3') duration = '1.5s';
+                    if (style === '#o2') duration = '2.2s';
+                    if (style === '#o1') duration = '3s';
+                    if (style === '#f1') duration = '4s';
+                    if (style === '#f3') duration = '5s';
+                    if (style === '#f4') duration = '6s';
+                    previewText.style.animationDuration = duration;
+                } else {
+                    previewText.classList.remove('animated-gradient');
+                    previewText.style.animationDuration = '';
+                }
+            };
+
+            const updateNamegradCode = () => {
+                const glowHex = namegradState.glowColor.substring(1).toUpperCase();
+                let parts = ['glow', glowHex, 'grad'];
+                parts.push(`r${namegradState.angle}`);
+                parts.push(...namegradState.colors.map(c => c.substring(1).toUpperCase()));
+                if (namegradState.wave.enabled) {
+                    parts.push(namegradState.wave.style.substring(1));
+                }
+                outputCode.value = `(${parts.join('#')})`;
+            };
+
+            const updateNamegradApp = () => {
+                // Leer valores del estado
+                namegradState.bold = boldCheckbox.checked;
+                namegradState.glowColor = namegradGlowPicker.value;
+                namegradState.angle = angleSlider.value;
+                namegradState.wave.enabled = namewaveEnabled.checked;
+                namegradState.wave.style = namewaveStyle.value;
+                
+                // Leer colores de los inputs
+                const colorDOMElements = document.querySelectorAll('#color-inputs .color-input-group input[type="color"]');
+                namegradState.colors = Array.from(colorDOMElements).map(input => input.value);
+                
+                // Actualizar UI
+                angleValue.textContent = `${namegradState.angle}°`;
+                namewaveStyle.disabled = !namegradState.wave.enabled;
+
+                updateNamegradPreview();
+                updateNamegradCode();
+            };
+
+            const renderColorInputs = () => {
+                colorInputsContainer.innerHTML = '';
+                namegradState.colors.forEach(color => {
+                    const group = document.createElement('div');
+                    group.className = 'color-input-group flex items-center space-x-2';
+                    group.innerHTML = `
+                        <input type="color" value="${color}">
+                        <input type="text" value="${color.toUpperCase()}" class="w-full glass-card border-gray-700 rounded-md p-2 font-mono text-sm text-white">
+                    `;
+                    const colorPicker = group.querySelector('input[type="color"]');
+                    const hexInput = group.querySelector('input[type="text"]');
+                    syncColorInputs(colorPicker, hexInput);
+                    colorInputsContainer.appendChild(group);
+                });
+            };
+
+            const handleColorCountChange = () => {
+                const newCount = parseInt(colorCountSelect.value, 10);
+                const currentCount = namegradState.colors.length;
+
+                if (newCount > currentCount) {
+                    for (let i = 0; i < newCount - currentCount; i++) {
+                        if (keepColorsCheckbox.checked && namegradState.colors.length > 0) {
+                            namegradState.colors.push(namegradState.colors[namegradState.colors.length - 1]);
+                        } else {
+                            namegradState.colors.push(getRandomHexColor());
+                        }
+                    }
+                } else if (newCount < currentCount) {
+                    namegradState.colors = namegradState.colors.slice(0, newCount);
+                }
+                
+                renderColorInputs();
+                updateNamegradApp();
+            };
+            
+            // --- Inicialización y Event Listeners ---
+            const initializeNamegrad = () => {
+                // Llenar select de cantidad de colores
+                for (let i = 2; i <= 15; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `${i} colores`;
+                    colorCountSelect.appendChild(option);
+                }
+                colorCountSelect.value = initialNamegradState.colors.length;
+
+                // Setear estado inicial
+                namegradGlowPicker.value = initialNamegradState.glowColor;
+                namegradGlowHexInput.value = initialNamegradState.glowColor.toUpperCase();
+                angleSlider.value = initialNamegradState.angle;
+                boldCheckbox.checked = initialNamegradState.bold;
+                namewaveEnabled.checked = initialNamegradState.wave.enabled;
+                namewaveStyle.value = initialNamegradState.wave.style;
+                
+                handleColorCountChange(); // Esto llama a render y update
+            };
+
+            // Listeners
+            nicknameInput.addEventListener('input', updateNamegradPreview);
+            syncColorInputs(namegradGlowPicker, namegradGlowHexInput);
+            colorCountSelect.addEventListener('change', handleColorCountChange);
+            keepColorsCheckbox.addEventListener('change', () => {
+                if (!keepColorsCheckbox.checked) handleColorCountChange(); // Randomize if unchecked
+            });
+            angleSlider.addEventListener('input', updateNamegradApp);
+            boldCheckbox.addEventListener('change', updateNamegradApp);
+            namewaveEnabled.addEventListener('change', updateNamegradApp);
+            namewaveStyle.addEventListener('change', updateNamegradApp);
+            
+            initializeNamegrad();
+
+            // --- Lógica de Namecolor ---
+             (() => {
+                const glowPicker = document.getElementById('namecolor-glow-picker'), glowHexInput = document.getElementById('namecolor-glow-hex-input'), textPicker = document.getElementById('namecolor-text-picker'), textHexInput = document.getElementById('namecolor-text-hex-input'), preview = document.getElementById('namecolor-preview'), output = document.getElementById('namecolor-output');
+                const saveNamecolorButton = document.getElementById('save-namecolor-button');
+                
+                const updateNamecolor = () => {
+                    const glowColor = glowPicker.value, textColor = textPicker.value;
+                    preview.style.color = textColor;
+                    preview.style.textShadow = `0 0 4px ${glowColor}, 0 0 8px ${glowColor}`;
+                    output.value = `(glow#${glowColor.substring(1).toUpperCase()}#${textColor.substring(1).toUpperCase()})`;
+                };
+
+                saveNamecolorButton.addEventListener('click', async () => {
+                    if (auth.currentUser) {
+                        try {
+                            await addDoc(collection(db, 'users', auth.currentUser.uid, 'colors'), {
+                                type: 'namecolor',
+                                code: output.value,
+                                glowColor: glowPicker.value,
+                                textColor: textPicker.value,
+                                createdAt: serverTimestamp()
+                            });
+                            // Feedback visual
+                            const icon = saveNamecolorButton.querySelector('i');
+                            icon.setAttribute('data-lucide', 'check-circle');
+                            lucide.createIcons();
+                            saveNamecolorButton.classList.add('text-green-400');
+                            setTimeout(() => {
+                                icon.setAttribute('data-lucide', 'save');
+                                lucide.createIcons();
+                                saveNamecolorButton.classList.remove('text-green-400');
+                            }, 2000);
+                        } catch (error) {
+                            console.error("Error guardando el color: ", error);
+                        }
+                    }
+                });
+
+                const syncInputs = (picker, hexInput) => {
+                    picker.addEventListener('input', () => { hexInput.value = picker.value.toUpperCase(); updateNamecolor(); });
+                    hexInput.addEventListener('input', (e) => {
+                        let value = e.target.value.trim();
+                        if (!value.startsWith('#')) value = '#' + value;
+                        if (/^#[0-9A-F]{6}$/i.test(value)) { picker.value = value; updateNamecolor(); }
+                    });
+                };
+                syncInputs(glowPicker, glowHexInput);
+                syncInputs(textPicker, textHexInput);
+                updateNamecolor();
+            })();
+
+            // --- Lógica de Nameflag ---
+            const flagSelect = document.getElementById('nameflag-select'), optionsSelect = document.getElementById('nameflag-options-select'), nameflagOutput = document.getElementById('nameflag-output'), nameflagGlowPicker = document.getElementById('nameflag-glow-picker'), nameflagGlowHexInput = document.getElementById('nameflag-glow-hex-input');
+            const flags = { "af": "Afghanistan", "al": "Albania", "dz": "Algeria", "ad": "Andorra", "ao": "Angola", "ag": "Antigua and Barbuda", "ar": "Argentina", "am": "Armenia", "au": "Australia", "at": "Austria", "az": "Azerbaijan", "bs": "Bahamas", "bh": "Bahrain", "bd": "Bangladesh", "bb": "Barbados", "by": "Belarus", "be": "Belgium", "bz": "Belize", "bj": "Benin", "bt": "Bhutan", "bo": "Bolivia", "ba": "Bosnia and Herzegovina", "bw": "Botswana", "br": "Brazil", "bn": "Brunei", "bg": "Bulgaria", "bf": "Burkina Faso", "bi": "Burundi", "cv": "Cabo Verde", "kh": "Cambodia", "cm": "Cameroon", "ca": "Canada", "cf": "Central African Republic", "td": "Chad", "cl": "Chile", "cn": "China", "co": "Colombia", "km": "Comoros", "cg": "Congo (Brazzaville)", "cd": "Congo (Democratic Rep.)", "cr": "Costa Rica", "ci": "Côte d'Ivoire", "hr": "Croatia", "cu": "Cuba", "cy": "Cyprus", "cz": "Czechia", "dk": "Denmark", "dj": "Djibouti", "dm": "Dominica", "do": "Dominican Republic", "ec": "Ecuador", "eg": "Egypt", "sv": "El Salvador", "gq": "Equatorial Guinea", "er": "Eritrea", "ee": "Estonia", "sz": "Eswatini", "et": "Ethiopia", "fj": "Fiji", "fi": "Finland", "fr": "France", "ga": "Gabon", "gm": "Gambia", "ge": "Georgia", "de": "Germany", "gh": "Ghana", "gr": "Greece", "gd": "Grenada", "gt": "Guatemala", "gn": "Guinea", "gw": "Guinea-Bissau", "gy": "Guyana", "ht": "Haiti", "hn": "Honduras", "hu": "Hungary", "is": "Iceland", "in": "India", "id": "Indonesia", "ir": "Iran", "iq": "Iraq", "ie": "Ireland", "il": "Israel", "it": "Italy", "jm": "Jamaica", "jp": "Japan", "jo": "Jordan", "kz": "Kazakhstan", "ke": "Kenya", "ki": "Kiribati", "kp": "Korea (North)", "kr": "Korea (South)", "kw": "Kuwait", "kg": "Kyrgyzstan", "la": "Laos", "lv": "Latvia", "lb": "Lebanon", "ls": "Lesotho", "lr": "Liberia", "ly": "Libya", "li": "Liechtenstein", "lt": "Lithuania", "lu": "Luxembourg", "mg": "Madagascar", "mw": "Malawi", "my": "Malaysia", "mv": "Maldives", "ml": "Mali", "mt": "Malta", "mh": "Marshall Islands", "mr": "Mauritania", "mu": "Mauritius", "mx": "Mexico", "fm": "Micronesia", "md": "Moldova", "mc": "Monaco", "mn": "Mongolia", "me": "Montenegro", "ma": "Morocco", "mz": "Mozambique", "mm": "Myanmar", "na": "Namibia", "nr": "Nauru", "np": "Nepal", "nl": "Netherlands", "nz": "New Zealand", "ni": "Nicaragua", "ne": "Niger", "ng": "Nigeria", "mk": "North Macedonia", "no": "Norway", "om": "Oman", "pk": "Pakistan", "pw": "Palau", "ps": "Palestine", "pa": "Panama", "pg": "Papua New Guinea", "py": "Paraguay", "pe": "Peru", "ph": "Philippines", "pl": "Poland", "pt": "Portugal", "qa": "Qatar", "ro": "Romania", "ru": "Russia", "rw": "Rwanda", "kn": "Saint Kitts and Nevis", "lc": "Saint Lucia", "vc": "Saint Vincent and the Grenadines", "ws": "Samoa", "sm": "San Marino", "st": "Sao Tome and Principe", "sa": "Saudi Arabia", "sn": "Senegal", "rs": "Serbia", "sc": "Seychelles", "sl": "Sierra Leone", "sg": "Singapore", "sk": "Slovakia", "si": "Slovenia", "sb": "Solomon Islands", "so": "Somalia", "za": "South Africa", "ss": "South Sudan", "es": "Spain", "lk": "Sri Lanka", "sd": "Sudan", "sr": "Suriname", "se": "Sweden", "ch": "Switzerland", "sy": "Syria", "tw": "Taiwan", "tj": "Tajikistan", "tz": "Tanzania", "th": "Thailand", "tl": "Timor-Leste", "tg": "Togo", "to": "Tonga", "tt": "Trinidad and Tobago", "tn": "Tunisia", "tr": "Turkey", "tm": "Turkmenistan", "tv": "Tuvalu", "ug": "Uganda", "ua": "Ukraine", "ae": "United Arab Emirates", "gb": "United Kingdom", "us": "United States", "uy": "Uruguay", "uz": "Uzbekistan", "vu": "Vanuatu", "va": "Vatican City", "ve": "Venezuela", "vn": "Vietnam", "ye": "Yemen", "zm": "Zambia", "zw": "Zimbabwe" };
+            const flagOptionsData = { "#r": "Giro", "#e": "Giro con expansión", "#d": "Sentido horario", "#u": "De arriba hacia abajo", "#c1": "Rango de ciclo 1", "#c3": "Rango de ciclo 3", "#c4": "Rango de ciclo 4", "#g1": "Rango de crecimiento 1", "#g3": "Rango de crecimiento 3", "#g4": "Rango de crecimiento 4", "#f1": "Velocidad 1", "#f3": "Velocidad 3", "#f4": "Velocidad 4" };
+            for (const code in flagOptionsData) { const option = document.createElement('option'); option.value = code; option.textContent = flagOptionsData[code]; optionsSelect.appendChild(option); }
+            const updateNameflag = () => {
+                const selectedFlag = flagSelect.value, selectedEffect = optionsSelect.value, glowColor = nameflagGlowPicker.value, glowHex = glowColor.substring(1).toLowerCase();
+                nameflagGlowHexInput.value = glowColor.toUpperCase();
+                nameflagOutput.value = selectedFlag ? `(glow#${glowHex}#flag#${selectedFlag}${selectedEffect})` : '';
+            };
+            const optgroup = document.createElement('optgroup'); optgroup.label = "Países";
+            const sortedCountries = Object.entries(flags).sort((a, b) => a[1].localeCompare(b[1]));
+            for (const [code, country] of sortedCountries) { const option = document.createElement('option'); option.textContent = country; option.value = code; optgroup.appendChild(option); }
+            flagSelect.appendChild(optgroup);
+            flagSelect.addEventListener('change', updateNameflag);
+            optionsSelect.addEventListener('change', updateNameflag);
+            nameflagGlowPicker.addEventListener('input', updateNameflag);
+            nameflagGlowHexInput.addEventListener('input', (e) => {
+                let value = e.target.value.trim();
+                if (!value.startsWith('#')) value = '#' + value;
+                if (/^#[0-9A-F]{6}$/i.test(value)) { nameflagGlowPicker.value = value; updateNameflag(); }
+            });
+            updateNameflag();
+
+
+            // --- LÓGICA DE AUTENTICACIÓN Y FIREBASE ---
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalCancelButton = document.getElementById('modal-cancel-button');
+            const modalConfirmButton = document.getElementById('modal-confirm-button');
+            
+            const authModal = document.getElementById('auth-modal');
+            const closeAuthModalButton = document.getElementById('close-auth-modal');
+            const loginButton = document.getElementById('login-button');
+            const registerButton = document.getElementById('register-button');
+            const logoutButton = document.getElementById('logout-button');
+            const loggedOutButtons = document.getElementById('logged-out-buttons');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const loginFormContainer = document.getElementById('login-form-container');
+            const registerFormContainer = document.getElementById('register-form-container');
+            const showRegisterFormButton = document.getElementById('show-register-form');
+            const showLoginFormButton = document.getElementById('show-login-form');
+            const myColorsNavItem = document.getElementById('my-colors-nav-item');
+            const communityNavItem = document.getElementById('community-nav-item');
+            const saveNamecolorButton = document.getElementById('save-namecolor-button');
+            const savedColorsGrid = document.getElementById('saved-colors-grid');
+            const noColorsMessage = document.getElementById('no-colors-message');
+            const userInfo = document.getElementById('user-info');
+            const adminNavItem = document.getElementById('admin-nav-item');
+            const communityToolCard = document.getElementById('community-tool-card');
+            let unsubscribeFromColors, unsubscribeFromSharedColors;
+
+            // --- Lógica de Modal de Confirmación ---
+            let confirmCallback = null;
+            const setupConfirmationModal = (title, message, onConfirm) => {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                confirmCallback = onConfirm;
+                confirmationModal.classList.remove('hidden');
+            };
+            modalCancelButton.addEventListener('click', () => confirmationModal.classList.add('hidden'));
+            modalConfirmButton.addEventListener('click', () => {
+                if(typeof confirmCallback === 'function') {
+                    confirmCallback();
+                }
+                confirmationModal.classList.add('hidden');
+            });
+
+
+            // Mostrar/ocultar modal de autenticación
+            const openAuthModal = () => authModal.classList.remove('hidden');
+            const closeAuthModal = () => authModal.classList.add('hidden');
+
+            loginButton.addEventListener('click', () => {
+                openAuthModal();
+                registerFormContainer.classList.add('hidden');
+                loginFormContainer.classList.remove('hidden');
+            });
+
+            registerButton.addEventListener('click', () => {
+                openAuthModal();
+                loginFormContainer.classList.add('hidden');
+                registerFormContainer.classList.remove('hidden');
+            });
+
+            closeAuthModalButton.addEventListener('click', closeAuthModal);
+            authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+
+            // Cambiar entre formularios de login y registro
+            showRegisterFormButton.addEventListener('click', () => {
+                loginFormContainer.classList.add('hidden');
+                registerFormContainer.classList.remove('hidden');
+            });
+            showLoginFormButton.addEventListener('click', () => {
+                registerFormContainer.classList.add('hidden');
+                loginFormContainer.classList.remove('hidden');
+            });
+
+            // Manejar envío de formularios
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('register-username').value.trim();
+                const password = document.getElementById('register-password').value;
+                const errorP = document.getElementById('register-error');
+                errorP.textContent = '';
+
+                if (username.includes('@') || username.length < 3) {
+                    errorP.textContent = 'Usuario inválido (mín. 3 caracteres, sin @).';
+                    return;
+                }
+
+                const email = `${username.toLowerCase()}@todoxat.tools`;
+
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    
+                    await updateProfile(user, { displayName: username });
+
+                    await setDoc(doc(db, "users", user.uid), {
+                        username: username,
+                        createdAt: serverTimestamp()
+                    });
+
+                    registerForm.reset();
+                    closeAuthModal();
+
+                } catch (error) {
+                    console.error('Error de registro:', error.code, error.message);
+                    let friendlyMessage = 'Error al registrarse. Intenta de nuevo.';
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            friendlyMessage = 'El nombre de usuario ya existe.';
+                            break;
+                        case 'auth/weak-password':
+                            friendlyMessage = 'La contraseña es muy débil (mín. 6 caracteres).';
+                            break;
+                        case 'auth/invalid-email':
+                             friendlyMessage = 'El nombre de usuario contiene caracteres no válidos.';
+                             break;
+                        case 'auth/network-request-failed':
+                             friendlyMessage = 'Error de red. Por favor, revisa tu conexión.';
+                             break;
+                    }
+                    errorP.textContent = friendlyMessage;
+                }
+            });
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value;
+                const errorP = document.getElementById('login-error');
+                const email = `${username.toLowerCase()}@todoxat.tools`;
+
+                signInWithEmailAndPassword(auth, email, password)
+                    .then(userCredential => {
+                        loginForm.reset();
+                        errorP.textContent = '';
+                        closeAuthModal();
+                    })
+                    .catch(error => {
+                        console.error('Error de inicio de sesión:', error.code, error.message);
+                        errorP.textContent = 'Usuario o contraseña incorrectos.';
+                    });
+            });
+
+            // Cerrar sesión
+            logoutButton.addEventListener('click', () => {
+                signOut(auth).catch(error => console.error('Error al cerrar sesión:', error));
+            });
+
+            // Escuchar cambios de estado de autenticación
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    // Usuario ha iniciado sesión
+                    loggedOutButtons.classList.add('hidden');
+                    logoutButton.classList.remove('hidden');
+                    myColorsNavItem.classList.remove('hidden');
+                    communityNavItem.classList.remove('hidden');
+                    communityToolCard.classList.remove('hidden');
+                    saveNamegradButton.classList.remove('hidden');
+                    saveNamecolorButton.classList.remove('hidden');
+                    
+                    userInfo.textContent = `Hola, ${user.displayName || 'Usuario'}`;
+                    userInfo.classList.remove('hidden');
+
+                    if (user.displayName && user.displayName.toLowerCase() === 'loco') {
+                        adminNavItem.classList.remove('hidden');
+                        loadAdminPanel();
+                    } else {
+                        adminNavItem.classList.add('hidden');
+                    }
+
+                    getSavedColors(user.uid);
+                    loadSharedColors();
+                } else {
+                    // Usuario ha cerrado sesión
+                    loggedOutButtons.classList.remove('hidden');
+                    logoutButton.classList.add('hidden');
+                    myColorsNavItem.classList.add('hidden');
+                    communityNavItem.classList.add('hidden');
+                    communityToolCard.classList.add('hidden');
+                    saveNamegradButton.classList.add('hidden');
+                    saveNamecolorButton.classList.add('hidden');
+                    userInfo.classList.add('hidden');
+                    adminNavItem.classList.add('hidden');
+                    
+                    if (unsubscribeFromColors) unsubscribeFromColors();
+                    if (unsubscribeFromSharedColors) unsubscribeFromSharedColors();
+                    
+                    savedColorsGrid.innerHTML = '';
+                    savedColorsGrid.appendChild(noColorsMessage);
+                    noColorsMessage.classList.remove('hidden');
+
+                    document.getElementById('shared-colors-grid').innerHTML = '';
+
+                    const currentTab = document.querySelector('.tab-content.active')?.id;
+                    if (currentTab === 'my-colors-content' || currentTab === 'admin-content' || currentTab === 'community-content') {
+                        switchToTab('home');
+                    }
+                }
+            });
+
+
+            // Guardar Namegrad
+            saveNamegradButton.addEventListener('click', async () => {
+                if (auth.currentUser) {
+                    try {
+                        await addDoc(collection(db, 'users', auth.currentUser.uid, 'colors'), {
+                            type: 'namegrad',
+                            code: outputCode.value,
+                            ...namegradState, // Guarda todo el estado del gradiente
+                            createdAt: serverTimestamp()
+                        });
+                        // Feedback visual
+                        const icon = saveNamegradButton.querySelector('i');
+                        icon.setAttribute('data-lucide', 'check-circle');
+                        lucide.createIcons();
+                        saveNamegradButton.classList.add('text-green-400');
+                        setTimeout(() => {
+                            icon.setAttribute('data-lucide', 'save');
+                            lucide.createIcons();
+                            saveNamegradButton.classList.remove('text-green-400');
+                        }, 2000);
+                    } catch (error) {
+                        console.error("Error guardando el gradiente: ", error);
+                    }
+                }
+            });
+
+            const handleShareToggle = async (e) => {
+                const button = e.currentTarget;
+                const colorId = button.dataset.colorId;
+                const isShared = button.dataset.isShared === 'true';
+                const sharedId = button.dataset.sharedId;
+                const user = auth.currentUser;
+
+                if (!user) return;
+
+                button.disabled = true;
+                const userColorRef = doc(db, 'users', user.uid, 'colors', colorId);
+
+                if (isShared) {
+                    try {
+                        const sharedColorRef = doc(db, 'shared_colors', sharedId);
+                        await deleteDoc(sharedColorRef);
+                        await updateDoc(userColorRef, {
+                            isShared: false,
+                            sharedDocId: deleteField()
+                        });
+                    } catch (error) {
+                        console.error("Error al dejar de compartir:", error);
+                    }
+                } else {
+                    try {
+                        const colorDoc = await getDoc(userColorRef);
+                        if (!colorDoc.exists()) throw new Error("El documento del color no existe.");
+                        const colorData = colorDoc.data();
+                        
+                        const sharedData = {
+                            ...colorData,
+                            ownerId: user.uid,
+                            ownerName: user.displayName,
+                            originalColorId: colorId,
+                            sharedAt: serverTimestamp()
+                        };
+                        
+                        const newSharedDocRef = await addDoc(collection(db, 'shared_colors'), sharedData);
+                        
+                        await updateDoc(userColorRef, {
+                            isShared: true,
+                            sharedDocId: newSharedDocRef.id
+                        });
+                    } catch (error) {
+                        console.error("Error al compartir:", error);
+                    }
+                }
+            };
+            
+            // Obtener y mostrar colores guardados
+            const getSavedColors = (userId) => {
+                const colorsCollection = collection(db, 'users', userId, 'colors');
+                const q = query(colorsCollection);
+
+                if (unsubscribeFromColors) unsubscribeFromColors();
+                unsubscribeFromColors = onSnapshot(q, (querySnapshot) => {
+                    const colors = [];
+                    querySnapshot.forEach((doc) => {
+                        colors.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    colors.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                    renderSavedColors(colors);
+                });
+            };
+
+            const renderSavedColors = (colors) => {
+                savedColorsGrid.innerHTML = '';
+                if (colors.length === 0) {
+                    noColorsMessage.classList.remove('hidden');
+                    savedColorsGrid.appendChild(noColorsMessage);
+                } else {
+                    noColorsMessage.classList.add('hidden');
+                    colors.forEach(colorData => {
+                        const card = document.createElement('div');
+                        card.className = 'glass-card p-3 rounded-xl flex flex-col space-y-2';
+
+                        let previewHTML = '';
+                        if (colorData.type === 'namegrad' && colorData.colors) {
+                            const angle = 360 - (colorData.angle || 90);
+                            const gradient = `linear-gradient(${angle}deg, ${colorData.colors.join(', ')})`;
+                            previewHTML = `<div class="h-20 rounded-lg" style="background-image: ${gradient};"></div>`;
+                        } else if (colorData.type === 'namecolor' && colorData.textColor && colorData.glowColor) {
+                            previewHTML = `<div class="h-20 rounded-lg flex items-center justify-center" style="background-color: ${colorData.textColor};">
+                                <span class="font-bold text-base" style="color: ${colorData.textColor}; text-shadow: 0 0 4px ${colorData.glowColor}, 0 0 8px ${colorData.glowColor};">Preview</span>
+                            </div>`;
+                        } else {
+                            previewHTML = `<div class="h-20 rounded-lg bg-gray-900/50 border border-dashed border-gray-700/50 flex items-center justify-center text-gray-500 text-sm">Sin vista previa</div>`;
+                        }
+                        
+                        const cardTitle = colorData.name 
+                            ? `<h4 class="text-base font-bold text-white truncate">${colorData.name}</h4>` 
+                            : `<h4 class="text-base font-semibold text-white uppercase">${colorData.type}</h4>`;
+
+                        const shareButtonText = colorData.isShared ? 'Dejar de Compartir' : 'Compartir';
+                        const shareButtonColor = colorData.isShared ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-blue-600 hover:bg-blue-700';
+
+                        card.innerHTML = `
+                            ${previewHTML}
+                            ${cardTitle}
+                            <input readonly value="${colorData.code}" class="w-full bg-black/20 border-none rounded p-2 font-mono text-xs my-1 text-white">
+                            <div class="mt-auto pt-1 flex items-center justify-between">
+                                <button class="share-toggle-btn ${shareButtonColor} text-white text-xs font-bold py-1 px-3 rounded-full"
+                                    data-color-id="${colorData.id}"
+                                    data-is-shared="${!!colorData.isShared}"
+                                    data-shared-id="${colorData.sharedDocId || ''}">
+                                    ${shareButtonText}
+                                </button>
+                                <div class="flex items-center space-x-1">
+                                    <button class="copy-saved-btn text-gray-400 hover:text-white p-1" title="Copiar Código"><i data-lucide="copy" class="h-4 w-4"></i></button>
+                                    <button class="delete-color-btn text-gray-400 hover:text-red-500 p-1" title="Eliminar"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        savedColorsGrid.appendChild(card);
+
+                        card.querySelector('.copy-saved-btn').addEventListener('click', (e) => setupCopyButton(e.currentTarget, colorData.code));
+                        card.querySelector('.delete-color-btn').addEventListener('click', () => {
+                            setupConfirmationModal('Eliminar Creación', '¿Estás seguro de que quieres eliminar esta creación? Esta acción no se puede deshacer.', async () => {
+                                 if(colorData.isShared) {
+                                    await deleteDoc(doc(db, 'shared_colors', colorData.sharedDocId));
+                                 }
+                                await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'colors', colorData.id));
+                            });
+                        });
+                        card.querySelector('.share-toggle-btn').addEventListener('click', handleShareToggle);
+
+                    });
+                    lucide.createIcons();
+                }
+            };
+
+            // --- Lógica de Comunidad ---
+            const loadSharedColors = () => {
+                const q = query(collection(db, "shared_colors"));
+                if(unsubscribeFromSharedColors) unsubscribeFromSharedColors();
+                unsubscribeFromSharedColors = onSnapshot(q, (querySnapshot) => {
+                    const colors = [];
+                    querySnapshot.forEach((doc) => {
+                        colors.push({ id: doc.id, ...doc.data() });
+                    });
+                    colors.sort((a, b) => (b.sharedAt?.seconds || 0) - (a.sharedAt?.seconds || 0));
+                    renderSharedColors(colors);
+                }, (error) => {
+                    console.error("Error al escuchar colores compartidos: ", error);
+                });
+            };
+
+            const renderSharedColors = (colors) => {
+                const grid = document.getElementById('shared-colors-grid');
+                const noColorsMsg = document.getElementById('no-shared-colors-message');
+                grid.innerHTML = '';
+                
+                if (colors.length === 0) {
+                    noColorsMsg.classList.remove('hidden');
+                    grid.appendChild(noColorsMsg);
+                    return;
+                }
+                
+                noColorsMsg.classList.add('hidden');
+                const isAdmin = auth.currentUser?.displayName?.toLowerCase() === 'loco';
+
+                colors.forEach(colorData => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-card p-3 rounded-xl flex flex-col space-y-2';
+
+                    let previewHTML = '';
+                     if (colorData.type === 'namegrad' && colorData.colors) {
+                        const angle = 360 - (colorData.angle || 90);
+                        const gradient = `linear-gradient(${angle}deg, ${colorData.colors.join(', ')})`;
+                        previewHTML = `<div class="h-20 rounded-lg" style="background-image: ${gradient};"></div>`;
+                    } else if (colorData.type === 'namecolor' && colorData.textColor && colorData.glowColor) {
+                        previewHTML = `<div class="h-20 rounded-lg flex items-center justify-center" style="background-color: ${colorData.textColor};">
+                            <span class="font-bold text-base" style="color: ${colorData.textColor}; text-shadow: 0 0 4px ${colorData.glowColor}, 0 0 8px ${colorData.glowColor};">Preview</span>
+                        </div>`;
+                    }
+
+                    const cardTitle = colorData.name 
+                        ? `<h4 class="text-base font-bold text-white truncate">${colorData.name}</h4>` 
+                        : `<h4 class="text-base font-semibold text-white uppercase">${colorData.type}</h4>`;
+
+                    const adminDeleteButton = isAdmin ? `<button class="admin-delete-shared-btn text-gray-400 hover:text-red-500 p-1" title="Eliminar (Admin)"><i data-lucide="shield-x" class="h-4 w-4"></i></button>` : '';
+
+                    card.innerHTML = `
+                        ${previewHTML}
+                        ${cardTitle}
+                        <p class="text-xs text-gray-400">Por: <span class="font-semibold text-gray-300">${colorData.ownerName || 'Anónimo'}</span></p>
+                        <input readonly value="${colorData.code}" class="w-full bg-black/20 border-none rounded p-2 font-mono text-xs my-1 text-white">
+                        <div class="mt-auto pt-1 flex items-center justify-end space-x-1">
+                             ${adminDeleteButton}
+                            <button class="copy-shared-btn text-gray-400 hover:text-white p-1" title="Copiar Código"><i data-lucide="copy" class="h-4 w-4"></i></button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                    
+                    card.querySelector('.copy-shared-btn').addEventListener('click', (e) => setupCopyButton(e.currentTarget, colorData.code));
+
+                    if(isAdmin) {
+                        card.querySelector('.admin-delete-shared-btn').addEventListener('click', () => {
+                             setupConfirmationModal('Eliminar Creación Compartida', '¿Estás seguro de que quieres eliminar esta creación de la comunidad? Esto también la quitará de la sección personal del usuario.', async () => {
+                                await deleteDoc(doc(db, 'shared_colors', colorData.id));
+                                // Update user's color doc to reflect it's no longer shared
+                                const userColorRef = doc(db, 'users', colorData.ownerId, 'colors', colorData.originalColorId);
+                                try {
+                                    await updateDoc(userColorRef, {
+                                        isShared: false,
+                                        sharedDocId: deleteField()
+                                    });
+                                } catch (error) {
+                                    console.log("El color original del usuario ya no existe, eliminando solo de la comunidad.");
+                                }
+                            });
+                        });
+                    }
+                });
+                lucide.createIcons();
+            };
+
+
+            // --- Lógica para añadir color manualmente ---
+            const manualColorInput = document.getElementById('manual-color-input');
+            const manualColorPreview = document.getElementById('manual-color-preview');
+            const saveManualColorButton = document.getElementById('save-manual-color-button');
+            const manualColorError = document.getElementById('manual-color-error');
+
+            const parseAndPreviewColorCode = () => {
+                const code = manualColorInput.value.trim();
+                manualColorError.textContent = '';
+                
+                const resetPreview = () => {
+                    manualColorPreview.style.backgroundImage = 'none';
+                    manualColorPreview.style.backgroundColor = 'transparent';
+                    manualColorPreview.style.textShadow = 'none';
+                    manualColorPreview.style.boxShadow = 'none';
+                };
+
+                resetPreview();
+
+                if (!code.startsWith('(') || !code.endsWith(')')) {
+                    return null;
+                }
+
+                const cleanCode = code.substring(1, code.length - 1);
+                const parts = cleanCode.split('#');
+                const name = document.getElementById('manual-color-name').value.trim() || null;
+                
+                if (parts[0] !== 'glow' || parts.length < 3) {
+                    manualColorError.textContent = 'El código debe empezar con (glow#...)';
+                    return null;
+                }
+
+                const glowColorHex = parts[1];
+                if (!/^[0-9A-F]{6}$/i.test(glowColorHex)) {
+                    manualColorError.textContent = 'Código de brillo (glow) inválido.';
+                    return null;
+                }
+                const glowColor = `#${glowColorHex}`;
+
+                // Check if it's a namegrad
+                const gradIndex = parts.indexOf('grad');
+                if (gradIndex !== -1 && gradIndex === 2) {
+                    let angle = 90;
+                    const gradColors = [];
+                    
+                    for (let i = gradIndex + 1; i < parts.length; i++) {
+                        const part = parts[i];
+                        if (part.startsWith('r')) {
+                            const angleValue = parseInt(part.substring(1), 10);
+                            if (!isNaN(angleValue)) {
+                                angle = angleValue;
+                            }
+                        } else if (/^[0-9A-F]{6}$/i.test(part)) {
+                            gradColors.push(`#${part}`);
+                        }
+                        // Ignore animation parts
+                    }
+
+                    if (gradColors.length < 1) {
+                        manualColorError.textContent = 'Namegrad no contiene colores válidos.';
+                        return null;
+                    }
+
+                    const gradient = `linear-gradient(${360 - angle}deg, ${gradColors.join(', ')})`;
+                    manualColorPreview.style.backgroundImage = gradient;
+                    manualColorPreview.style.boxShadow = `0 0 8px ${glowColor}, 0 0 12px ${glowColor}`;
+
+                    return { 
+                        type: 'namegrad', 
+                        name: name,
+                        code: code, 
+                        glowColor: glowColor, 
+                        angle: angle, 
+                        colors: gradColors 
+                    };
+
+                } else if (parts.length === 3) { // It's a namecolor
+                    const textColorHex = parts[2];
+                    if (!/^[0-9A-F]{6}$/i.test(textColorHex)) {
+                        manualColorError.textContent = 'Color de texto inválido.';
+                        return null;
+                    }
+                    const textColor = `#${textColorHex}`;
+                    
+                    manualColorPreview.style.backgroundColor = textColor;
+                    manualColorPreview.style.boxShadow = `0 0 8px ${glowColor}, 0 0 12px ${glowColor}`;
+                    return { 
+                        type: 'namecolor', 
+                        name: name,
+                        code: code, 
+                        glowColor: glowColor, 
+                        textColor: textColor 
+                    };
+                }
+                
+                manualColorError.textContent = 'Formato de código no reconocido.';
+                return null;
+            };
+
+            manualColorInput.addEventListener('input', parseAndPreviewColorCode);
+
+            saveManualColorButton.addEventListener('click', async () => {
+                const colorData = parseAndPreviewColorCode();
+                if (colorData && auth.currentUser) {
+                    try {
+                        await addDoc(collection(db, 'users', auth.currentUser.uid, 'colors'), {
+                            ...colorData,
+                            createdAt: serverTimestamp()
+                        });
+                        
+                        manualColorInput.value = '';
+                        document.getElementById('manual-color-name').value = '';
+                        parseAndPreviewColorCode(); // Resetea la vista previa
+                        manualColorError.textContent = '¡Guardado con éxito!';
+                        setTimeout(() => manualColorError.textContent = '', 2500);
+
+                    } catch (error) {
+                        console.error("Error guardando color manual:", error);
+                        manualColorError.textContent = 'Error al guardar.';
+                    }
+                } else if (!colorData) {
+                    manualColorError.textContent = 'El código es inválido para guardar.';
+                }
+            });
+
+
+            // --- Lógica del Panel de Administración ---
+             const deleteUserAndData = async (userId, username) => {
+                try {
+                    // Borrar todos los colores del usuario
+                    const colorsCollectionRef = collection(db, 'users', userId, 'colors');
+                    const colorsSnapshot = await getDocs(colorsCollectionRef);
+                    const deletePromises = [];
+                    colorsSnapshot.forEach((colorDoc) => {
+                        const colorData = colorDoc.data();
+                        // Si el color está compartido, borrarlo de la colección compartida
+                        if(colorData.isShared && colorData.sharedDocId) {
+                            deletePromises.push(deleteDoc(doc(db, 'shared_colors', colorData.sharedDocId)));
+                        }
+                        // Añadir la promesa de borrado del color del usuario
+                        deletePromises.push(deleteDoc(colorDoc.ref));
+                    });
+                    
+                    await Promise.all(deletePromises);
+                    
+                    // Borrar el documento del usuario
+                    await deleteDoc(doc(db, 'users', userId));
+                    
+                    // Nota: Esto NO elimina al usuario de Firebase Auth.
+                    // Para ello se necesitaría el SDK de Admin en un backend.
+                    // Esta función solo borra los datos de Firestore.
+                    console.log(`Datos del usuario ${username} eliminados de Firestore.`);
+                    loadAdminPanel(); // Recargar la lista de usuarios
+                } catch (error) {
+                    console.error("Error al eliminar usuario y sus datos:", error);
+                }
+            };
+
+            const loadAdminPanel = async () => {
+                const userListContainer = document.getElementById('user-list-container');
+                userListContainer.innerHTML = '<p id="admin-loading-message">Cargando usuarios...</p>';
+
+                try {
+                    const usersSnapshot = await getDocs(collection(db, "users"));
+                    const userPromises = usersSnapshot.docs.map(async (userDoc) => {
+                       try {
+                            const userData = userDoc.data();
+                            if (userData.username && userData.username.toLowerCase() === 'loco') return null;
+
+                            const colorsSnapshot = await getDocs(collection(db, 'users', userDoc.id, 'colors'));
+                            return {
+                                id: userDoc.id,
+                                username: userData.username || 'Usuario sin nombre',
+                                colorCount: colorsSnapshot.size
+                            };
+                        } catch (error) {
+                            console.error(`Error procesando usuario ${userDoc.id}:`, error);
+                            const userData = userDoc.data();
+                            return {
+                                id: userDoc.id,
+                                username: userData.username || `Usuario con error`,
+                                colorCount: 'Error'
+                            };
+                        }
+                    });
+                    
+                    let usersWithColors = await Promise.all(userPromises);
+                    usersWithColors = usersWithColors.filter(user => user !== null);
+                    userListContainer.innerHTML = ''; 
+
+                    if (usersWithColors.length === 0) {
+                        userListContainer.innerHTML = '<p>No se encontraron otros usuarios registrados.</p>';
+                        return;
+                    }
+                    
+                    usersWithColors.sort((a,b) => a.username.localeCompare(b.username));
+
+                    usersWithColors.forEach(user => {
+                        const userElement = document.createElement('div');
+                        userElement.className = 'flex justify-between items-center p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors';
+                        userElement.innerHTML = `
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-white">${user.username}</span>
+                                <span class="text-xs text-gray-400">${user.id}</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm bg-purple-400/20 text-purple-300 px-2 py-1 rounded-full font-medium">${user.colorCount} colores</span>
+                                <button class="delete-user-btn text-gray-400 hover:text-red-500" title="Eliminar Usuario"><i data-lucide="trash-2" class="h-5 w-5"></i></button>
+                            </div>
+                        `;
+                        userListContainer.appendChild(userElement);
+
+                        userElement.querySelector('.delete-user-btn').addEventListener('click', () => {
+                             setupConfirmationModal(
+                                `Eliminar a ${user.username}`,
+                                '¿Seguro que quieres eliminar a este usuario y todos sus datos? Esta acción es irreversible.',
+                                () => deleteUserAndData(user.id, user.username)
+                            );
+                        });
+                    });
+                    lucide.createIcons();
+                } catch (error) {
+                    console.error("Error loading admin panel:", error);
+                    userListContainer.innerHTML = '<p class="text-red-400">Error al cargar la lista de usuarios.</p>';
+                }
+            };
+
+        });
+    </script>
+</body>
+</html>
+
