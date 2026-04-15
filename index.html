@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VUTECO</title>
+    <title>BUTECO</title>
     <link rel="icon" href="https://xatimg.com/image/iYh5s2D4kBQt.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -193,7 +193,7 @@
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 fixed inset-y-0 left-0 glass-card border-r border-gray-800/50 flex flex-col transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-30">
             <div class="p-6 text-center border-b border-gray-800/50 flex-shrink-0">
-                <img src="https://xatimg.com/image/236O0HBG8NEC.png" alt="buteco Logo" class="h-12 mx-auto">
+                <img src="https://xatimg.com/image/iYh5s2D4kBQt.png" alt="buteco Logo" class="h-12 mx-auto">
             </div>
             
             <!-- Auth Section -->
@@ -250,7 +250,7 @@
                          <button id="menu-toggle" class="text-white p-2 rounded-md hover:bg-white/10">
                             <i data-lucide="menu" class="h-6 w-6"></i>
                         </button>
-                        <span class="text-lg font-bold text-white">TODOXAT Tools</span>
+                        <span class="text-lg font-bold text-white">tODOS</span>
                         <div class="w-10"></div> <!-- Spacer -->
                     </div>
 
@@ -609,13 +609,13 @@
                 const fetchData = async (url) => { try { const r = await fetch(`https://api.xatblog.net/${url}?cb=${new Date().getTime()}`); return await r.json(); } catch (e) { console.error(e); return null; } };
                 latestPowerText.textContent = countdownText.textContent = promotedLinks.textContent = "Cargando...";
                 const latestData = await fetchData('latest');
-                latestPowerText.textContent = latestData?.powers?.length > 0 ? `${latestData.powers[0].name} (${latestData.powers[0].prices?.store || 'N/A'})` : "No disponible";
+                latestPowerText.textContent = latestData?.powers?.length > 0 ? `${latestData.powers[0].name} (${latestData.powers[0].prices?.store || 'N/A'})` : "Não Disponivel";
                 const countdownData = await fetchData('countdown');
                 if (countdownData?.seconds !== undefined) {
                     let s = parseInt(countdownData.seconds, 10);
-                    if (s < 0) { countdownText.textContent = "¡Nuevo power ahora!"; }
+                    if (s < 0) { countdownText.textContent = "Novo Power Agora!"; }
                     else { const update = () => { if(s<=0){countdownText.textContent="¡Nuevo power ahora!";clearInterval(countdownInterval);return;} let d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sec=s%60; let t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; if(d>0)t=`${d}d ${t}`; countdownText.textContent=t; s--; }; update(); countdownInterval=setInterval(update,1000); }
-                } else { countdownText.textContent = "No hay contador"; }
+                } else { countdownText.textContent = "Não a contador"; }
                 const promotedData = await fetchData('promoted');
                 if (promotedData?.chats?.length > 0) {
                     let i = 0; const chats = promotedData.chats; const update = () => { promotedLinks.classList.add('opacity-0'); setTimeout(()=>{ const c1=chats[i%chats.length],c2=chats[(i+1)%chats.length];let h=`<a href="https://xat.com/${c1.name}" target="_blank" class="hover:text-purple-400">${c1.name}</a>`; if(chats.length>1)h+=`<span class="text-gray-500 mx-1">|</span><a href="https://xat.com/${c2.name}" target="_blank" class="hover:text-purple-400">${c2.name}</a>`; promotedLinks.innerHTML=h; promotedLinks.classList.remove('opacity-0'); i=(i+2)%chats.length;},300);}; update(); setInterval(update,5000);
